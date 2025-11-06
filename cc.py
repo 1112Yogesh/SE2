@@ -202,9 +202,12 @@ if __name__ == "__main__":
         ),
     ]
 
+    output_dir = "output/cc"
+    os.makedirs(output_dir, exist_ok=True)
+
     try:
         for project in projects:
-            with open(f"{project.name.replace(' ', '_').lower()}_cc.csv", "w") as f:
+            with open(f"{output_dir}/{project.name.replace(' ', '_').lower()}_cc.csv", "w") as f:
                 f.write("filename,function_start,function_end,cyclomatic\n")
                 metrics = project.get_cc_metrics()
                 for detail in metrics["details"]:

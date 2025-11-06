@@ -130,8 +130,11 @@ if __name__ == "__main__":
         )
     ]
 
+    output_dir = "output/sloc"
+    os.makedirs(output_dir, exist_ok=True)
+
     try:
-        with open(f"loc.csv", "w") as f:
+        with open(f"{output_dir}/loc.csv", "w") as f:
             f.write("project,LOC,SLOC\n")
             for project in projects:
                 line_count = project.get_LOC()
