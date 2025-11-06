@@ -1,0 +1,12 @@
+LOC – total number of lines in a source code file, including comments, blank lines, etc.
+    - countable using the Unix wc utility
+
+SLOC – any line of program text that is not a
+comment or blank line, regardless of the number
+of statements or fragments of statements on the
+line
+
+includes program headers, declarations,
+executable and non-executable statements
+
+

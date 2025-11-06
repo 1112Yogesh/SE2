@@ -1,0 +1,25 @@
+McCabe Cyclomatic Complexity
+
+In the control flow graph for a procedure reachable from the main procedure containing
+N nodes, E edges, p connected procedures
+
+- only procedures that are reachable from the main procedure
+    V(G) = E – N + 2p
+
+
+Does p allow analysis of a collection of programs?
+
+programs with nested functions
+
+typically only look at a single program rather
+than a “library” with many disconnected
+routines
+
+Herraiz and Hassan (2011) use the maximum or average cyclomatic complexity for all functions in a file.
+
+
+
+Recommended Ranges for Cyclomatic Complexity
+V(G) should be less than 10
+commonly accepted range Mathur recommends less than 5
+Some suggest that 10-20 should be classified as “challenging”
