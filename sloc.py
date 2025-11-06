@@ -43,7 +43,6 @@ class project:
 
         return total
 
-
     def get_SLOC(self):
         # Source Lines of Code (SLOC) counting can be implemented here
         def count_file(path):
