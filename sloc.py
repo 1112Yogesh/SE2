@@ -133,11 +133,11 @@ if __name__ == "__main__":
 
     try:
         with open(f"loc.csv", "w") as f:
-            f.write("LOC,SLOC\n")
+            f.write("project,LOC,SLOC\n")
             for project in projects:
                 line_count = project.get_LOC()
                 sloc_count = project.get_SLOC()
-                f.write(f"{line_count},{sloc_count}\n")
+                f.write(f"{project.name},{line_count},{sloc_count}\n")
                 print(f"Processed project: {project.name}, LOC: {line_count}, SLOC: {sloc_count}")
     except FileNotFoundError:
         print(f"File not found: {project.src}")
