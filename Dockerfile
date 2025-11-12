@@ -1,19 +1,28 @@
-# Use a minimal, lightweight base image
-FROM ubuntu:22.04
-# Install git
-RUN apt-get update && apt-get install -y git
+# Use Python base image
+FROM python:3.11-slim
 
-# Set the working directory inside the container
-# This is where we will mount the host's directory
-WORKDIR /projects
+# Install git (needed for cloning repositories)
+RUN apt-get update && apt-get install -y git && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set the command to run when the container starts
-# This will clone all four repositories into the WORKDIR
-# We explicitly name the target directories (e.g., "jsoncpp")
-CMD ["sh", "-c", \
-    "echo 'Starting to clone repositories into the current directory...'; \
-    git clone https://github.com/open-source-parsers/jsoncpp.git jsoncpp && \
-    git clone https://github.com/OGRECave/ogre.git ogre && \
-    git clone https://github.com/sqlite/sqlite.git sqlite && \
-    git clone https://github.com/tmux/tmux.git tmux; \
-    echo 'Cloning complete!'"]
+# Set the working directory
+WORKDIR /app
+
+# Copy all Python scripts
+COPY *.py ./
+COPY *.sh ./
+
+# Make shell scripts executable
+RUN chmod +x *.sh
+
+# Clone the repositories if they don't exist
+RUN git clone https://github.com/open-source-parsers/jsoncpp.git jsoncpp || true && \
+    git clone https://github.com/OGRECave/ogre.git ogre || true && \
+    git clone https://github.com/sqlite/sqlite.git sqlite || true && \
+    git clone https://github.com/tmux/tmux.git tmux || true
+
+# Create output directory
+RUN mkdir -p output
+
+# Default command: run all analysis scripts
+CMD ["./run_all.sh"]

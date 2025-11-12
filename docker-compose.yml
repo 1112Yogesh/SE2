@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  analyzer:
+    build:
+      context: .
+      dockerfile: Dockerfile.new
+    container_name: code-analyzer
+    volumes:
+      # Mount output directory to access results on host
+      - ./output:/app/output
+    environment:
+      - PYTHONUNBUFFERED=1
