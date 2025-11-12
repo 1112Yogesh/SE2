@@ -5,18 +5,6 @@ import lizard
 
 
 def estimate_dfc_from_function(func_info) -> int:
-    """
-    Estimate Data Flow Complexity using Lizard function analysis.
-    
-    Since we can't do full reaching definitions analysis without AST,
-    we use a heuristic approach based on:
-    - Number of parameters (incoming data flow)
-    - Cyclomatic complexity (control flow that affects data flow)
-    - Token count as proxy for variable usage
-    
-    DFC ≈ (parameters × complexity) + (complexity - 1)
-    This approximates interblock data dependencies.
-    """
     # Base DFC: parameters represent incoming data dependencies
     param_flow = func_info.parameter_count
     
@@ -119,12 +107,18 @@ def write_function_details_csv(output_path: str, function_details: List[Dict]):
     if not function_details:
         return
     
-    fieldnames = ["file", "function", "parameters", "complexity", "dfc", "nloc"]
+    fieldnames = ["file", "function", "parameters", "dfc", "nloc"]
     with open(output_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(function_details)
-
+        for func in function_details:
+            writer.writerow({
+                "file": func.get("file", ""),
+                "function": func.get("function", ""),
+                "parameters": func.get("parameters", 0),
+                "dfc": func.get("dfc", 0),
+                "nloc": func.get("nloc", 0)
+            })
 
 def write_summary_csv(output_path: str, metrics: Dict[str, int]):
     """Write aggregated summary to CSV."""
