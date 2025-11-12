@@ -102,9 +102,49 @@ class project:
 
         return total
 
-    def get_cocomo_metrics(self):
-        # COCOMO metrics calculation can be implemented here
-        pass
+    def get_cocomo_metrics(self, mode="organic"):
+        """
+        Calculate COCOMO metrics based on SLOC.
+        
+        Modes:
+        - organic: Small teams, familiar environment (a=2.4, b=1.05, c=2.5, d=0.38)
+        - semi-detached: Medium complexity (a=3.0, b=1.12, c=2.5, d=0.35)
+        - embedded: Complex, strict constraints (a=3.6, b=1.20, c=2.5, d=0.32)
+        
+        Returns:
+        - effort: Person-months
+        - time: Development time in months
+        - people: Average team size
+        """
+        sloc_kloc = self.get_SLOC() / 1000.0  # Convert SLOC to KLOC
+        
+        # COCOMO coefficients for different modes
+        coefficients = {
+            "organic": {"a": 2.4, "b": 1.05, "c": 2.5, "d": 0.38},
+            "semi-detached": {"a": 3.0, "b": 1.12, "c": 2.5, "d": 0.35},
+            "embedded": {"a": 3.6, "b": 1.20, "c": 2.5, "d": 0.32}
+        }
+        
+        if mode.lower() not in coefficients:
+            mode = "organic"
+        
+        coeff = coefficients[mode.lower()]
+        
+        # Effort = a * (KLOC)^b (in person-months)
+        effort = coeff["a"] * (sloc_kloc ** coeff["b"])
+        
+        # Development time = c * (Effort)^d (in months)
+        time = coeff["c"] * (effort ** coeff["d"])
+        
+        # Average team size = Effort / Time
+        people = effort / time if time > 0 else 0
+        
+        return {
+            "effort": effort,
+            "time": time,
+            "people": people,
+            "sloc_kloc": sloc_kloc
+        }
 
 if __name__ == "__main__":
     projects = [ project(
@@ -133,17 +173,32 @@ if __name__ == "__main__":
         )
     ]
 
-    output_dir = "output/sloc"
+    output_dir = "output/cocomo"
     os.makedirs(output_dir, exist_ok=True)
 
     try:
-        with open(f"{output_dir}/loc.csv", "w") as f:
-            f.write("project,LOC,SLOC\n")
-            for project in projects:
-                line_count = project.get_LOC()
-                sloc_count = project.get_SLOC()
-                f.write(f"{project.name},{line_count},{sloc_count}\n")
-                print(f"Processed project: {project.name}, LOC: {line_count}, SLOC: {sloc_count}")
-    except FileNotFoundError:
-        print(f"File not found: {project.src}")
+        # Write COCOMO metrics for all three modes
+        modes = ["organic", "semi-detached", "embedded"]
+        
+        for mode in modes:
+            with open(f"{output_dir}/cocomo_{mode}.csv", "w") as f:
+                f.write("project,SLOC(KLOC),Effort(person-months),Time(months),People\n")
+                for proj in projects:
+                    metrics = proj.get_cocomo_metrics(mode=mode)
+                    f.write(f"{proj.name},{metrics['sloc_kloc']:.2f},{metrics['effort']:.2f},{metrics['time']:.2f},{metrics['people']:.2f}\n")
+                print(f"\nCOCOMO metrics ({mode} mode):")
+                print(f"  Written to {output_dir}/cocomo_{mode}.csv")
+        
+        # Write combined COCOMO metrics
+        with open(f"{output_dir}/cocomo_all.csv", "w") as f:
+            f.write("project,mode,SLOC(KLOC),Effort(person-months),Time(months),People\n")
+            for proj in projects:
+                for mode in modes:
+                    metrics = proj.get_cocomo_metrics(mode=mode)
+                    f.write(f"{proj.name},{mode},{metrics['sloc_kloc']:.2f},{metrics['effort']:.2f},{metrics['time']:.2f},{metrics['people']:.2f}\n")
+        
+        print(f"\nAll COCOMO metrics written to {output_dir}/cocomo_all.csv")
+        
+    except FileNotFoundError as e:
+        print(f"File not found: {e}")
         sys.exit(1)
