@@ -1,2 +1,4 @@
 output/
 __pycache__
+output.zip
+.DS_Store
