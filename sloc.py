@@ -114,7 +114,7 @@ if __name__ == "__main__":
             name="OGRE",
             description="Object-Oriented Graphics Rendering Engine",
             src="ogre/OgreMain",
-            src_file_extensions=[".c", ".h", ".cpp"],
+            src_file_extensions=[".h", ".c", ".cpp"],
         ),
         project(
             name="Sqlite",
@@ -126,7 +126,7 @@ if __name__ == "__main__":
             name="tmux",
             description="Terminal multiplexer",
             src="tmux",
-            src_file_extensions=[".c", ".h"],
+            src_file_extensions=[".h", ".c"],
         )
     ]
 

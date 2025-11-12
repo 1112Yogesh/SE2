@@ -178,26 +178,26 @@ if __name__ == "__main__":
             name="Json CPP",
             description="jsoncpp",
             src="jsoncpp/src/lib_json",
-            src_file_extensions=[".cpp"],
+            src_file_extensions=[".h", ".cpp"],
         ),
         project(
             name="OGRE",
             description="Object-Oriented Graphics Rendering Engine",
             src="ogre/OgreMain/src",
-            src_file_extensions=[".c", ".cpp"],
+            src_file_extensions=[".h", ".c", ".cpp"],
         ),
         project(
             name="Sqlite",
             description="SQLite",
             src="sqlite/src",
-            src_file_extensions=[".c"],
+            src_file_extensions=[".h", ".c"],
             ignore=["test.*"]
         ),
         project(
             name="tmux",
             description="Terminal multiplexer",
             src="tmux",
-            src_file_extensions=[".c"],
+            src_file_extensions=[".h", ".c"],
             ignore=["compat/.*"]
         ),
     ]
