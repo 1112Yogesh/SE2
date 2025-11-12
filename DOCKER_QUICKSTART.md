@@ -39,11 +39,11 @@ docker run -it --rm -v $(pwd)/output:/app/output code-analyzer /bin/bash
 
 - **Base:** Python 3.11-slim
 - **Dependencies:** lizard (for code complexity analysis)
-- **Repositories cloned:**
-  - jsoncpp
-  - ogre
-  - sqlite
-  - tmux
+- **Repositories:** Copied from your current directory
+  - jsoncpp/
+  - ogre/
+  - sqlite/
+  - tmux/
 
 ## Analysis Scripts Run
 
