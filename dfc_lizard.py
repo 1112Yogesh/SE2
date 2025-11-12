@@ -30,9 +30,9 @@ def estimate_dfc_from_function(func_info) -> int:
     return dfc
 
 
-def analyze_file(file_path: str) -> Tuple[int, int, List[Dict]]:
+def analyze_file(file_path: str) -> Tuple[int, int]:
     """
-    Analyze a single file and return (dfc, function_count, function_details).
+    Analyze a single file and return (dfc, function_count).
     
     Uses Lizard to parse C/C++ files and estimates DFC based on
     function complexity and parameter flow.
@@ -42,32 +42,22 @@ def analyze_file(file_path: str) -> Tuple[int, int, List[Dict]]:
         
         total_dfc = 0
         func_count = 0
-        function_details = []
         
         for func in analysis.function_list:
             dfc = estimate_dfc_from_function(func)
             total_dfc += dfc
             func_count += 1
-            
-            function_details.append({
-                'file': file_path,
-                'function': func.name,
-                'parameters': func.parameter_count,
-                'complexity': func.cyclomatic_complexity,
-                'dfc': dfc,
-                'nloc': func.nloc
-            })
         
-        return total_dfc, func_count, function_details
+        return total_dfc, func_count
     except Exception:
-        return 0, 0, []
+        return 0, 0
 
 
-def analyze_directory(directory: str, extensions: List[str], ignore: Optional[List[str]] = None) -> Tuple[Dict[str, int], List[Dict]]:
+def analyze_directory(directory: str, extensions: List[str], ignore: Optional[List[str]] = None) -> Dict[str, int]:
     """
     Aggregate DFC across all source files in a directory matching extensions.
     
-    Returns (metrics_dict, function_details_list).
+    Returns a dict with total dfc, total_files, total_functions.
     """
     if not os.path.exists(directory):
         raise FileNotFoundError(directory)
@@ -75,7 +65,6 @@ def analyze_directory(directory: str, extensions: List[str], ignore: Optional[Li
     total_dfc = 0
     total_files = 0
     total_functions = 0
-    all_function_details = []
     
     for root, _, files in os.walk(directory):
         for name in files:
@@ -84,14 +73,12 @@ def analyze_directory(directory: str, extensions: List[str], ignore: Optional[Li
             if ignore and any(re.match(pat, name) for pat in ignore):
                 continue
             path = os.path.join(root, name)
-            dfc, funcs, func_details = analyze_file(path)
+            dfc, funcs = analyze_file(path)
             total_dfc += dfc
             total_functions += funcs
             total_files += 1
-            all_function_details.extend(func_details)
     
-    metrics = {"dfc": total_dfc, "files": total_files, "functions": total_functions}
-    return metrics, all_function_details
+    return {"dfc": total_dfc, "files": total_files, "functions": total_functions}
 
 
 class Project:
@@ -104,30 +91,16 @@ class Project:
         self.src_file_extensions = src_file_extensions
         self.ignore = ignore
     
-    def get_dfc_metrics(self) -> Tuple[Dict[str, int], List[Dict]]:
-        """Return aggregated DFC metrics and function details for the project source path."""
+    def get_dfc_metrics(self) -> Dict[str, int]:
+        """Return aggregated DFC metrics for the project source path."""
         if os.path.isfile(self.src):
-            dfc, funcs, func_details = analyze_file(self.src)
-            return {"dfc": dfc, "files": 1, "functions": funcs}, func_details
+            dfc, funcs = analyze_file(self.src)
+            return {"dfc": dfc, "files": 1, "functions": funcs}
         else:
             return analyze_directory(self.src, self.src_file_extensions, self.ignore)
 
 
-def write_function_details_csv(output_path: str, function_details: List[Dict]):
-    """Write function-level DFC details to CSV."""
-    import csv
-    if not function_details:
-        return
-    
-    fieldnames = ["file", "function", "parameters", "complexity", "dfc", "nloc"]
-    with open(output_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(function_details)
-
-
-def write_summary_csv(output_path: str, metrics: Dict[str, int]):
-    """Write aggregated summary to CSV."""
+def write_dfc_csv(output_path: str, metrics: Dict[str, int]):
     import csv
     fieldnames = ["dfc", "files", "functions"]
     with open(output_path, "w", newline="", encoding="utf-8") as f:
@@ -172,21 +145,12 @@ if __name__ == "__main__":
     
     for proj in projects:
         try:
-            metrics, func_details = proj.get_dfc_metrics()
-            
-            # Write function-level details
-            details_file = os.path.join(output_dir, f"{proj.name.replace(' ', '_').lower()}_functions.csv")
-            write_function_details_csv(details_file, func_details)
-            
-            # Write summary
-            summary_file = os.path.join(output_dir, f"{proj.name.replace(' ', '_').lower()}_summary.csv")
-            write_summary_csv(summary_file, metrics)
-            
-            # Print aggregated results to console
+            metrics = proj.get_dfc_metrics()
+            out_file = os.path.join(output_dir, f"{proj.name.replace(' ', '_').lower()}_dfc.csv")
+            write_dfc_csv(out_file, metrics)
             print(f"{proj.name}: DFC={metrics['dfc']}, Files={metrics['files']}, Functions={metrics['functions']}")
-            
         except FileNotFoundError:
-            out_file = os.path.join(output_dir, f"{proj.name.replace(' ', '_').lower()}_summary.csv")
+            out_file = os.path.join(output_dir, f"{proj.name.replace(' ', '_').lower()}_dfc.csv")
             with open(out_file, "w", newline="", encoding="utf-8") as f:
                 import csv
                 writer = csv.writer(f)
