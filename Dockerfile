@@ -8,6 +8,12 @@ RUN apt-get update && apt-get install -y git && \
 # Set the working directory
 WORKDIR /app
 
+# Copy requirements file first (for better caching)
+COPY requirements.txt ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Copy all Python scripts
 COPY *.py ./
 COPY *.sh ./
@@ -25,4 +31,4 @@ RUN git clone https://github.com/open-source-parsers/jsoncpp.git jsoncpp || true
 RUN mkdir -p output
 
 # Default command: run all analysis scripts
-CMD ["./run_all.sh"]
+CMD ["/bin/bash", "run_all.sh"]

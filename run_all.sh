@@ -1,3 +1,4 @@
+#!/bin/bash
 python cc.py
 python cocomo.py
 python dfc.py
