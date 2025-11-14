@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y git && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-RUN pip install --no-cache-dir lizard
+RUN pip install --no-cache-dir lizard pandas numpy matplotlib Jinja2
 
 # Working directory
 WORKDIR /workspace
